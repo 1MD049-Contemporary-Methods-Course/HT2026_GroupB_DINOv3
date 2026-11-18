@@ -1,0 +1,17 @@
+# Local NuPlan dataset and derived conversion artifacts
+nuplan_data/
+converted_data/
+annotations/*.pkl
+annotations/*.pickle
+
+# Generated feature files outside the committed implementation outputs
+/features.pt
+
+# Python environments, bytecode, and editor/OS files
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+.idea/
+.vscode/
