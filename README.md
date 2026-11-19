@@ -42,9 +42,55 @@ python dino_player.py \
 
 `--root` should be arranged so the NuPlan camera image paths in the annotation file resolve under it (the helper also handles paths containing `nuplan-v1.1/`). The viewer defaults to CPU when CUDA is unavailable. On a low-end machine, keep the default width and low playback frame rate.
 
-## Member 2 — To be completed
+## Olivia Buhr — DINO for Object Tracking​
 
-_Add implementation idea, method, and relevant files._
+Use a frozen DINO model as backbone for **semi-supervised video object
+segmentation** on DAVIS 2017: given the ground-truth mask of the first frame, follow the
+object(s) through the rest of the video. No training is done.
+
+proof of concept: trying DINOv2 - ViT-B/14 on 10 videos. 
+
+for fun: Comparison with YOLO on the same dataset. It only works for 80 coco classes it has been trained on but it performed better than DINO on this dataset. It does however missclassify camel as a horse, but the segmentation is still good for that example. 
+
+### Method: label propagation
+1. **Features:** each frame is resized to height 448 and passed through DINOv2 (ViT-B/14).
+   Every 14×14 patch gets a feature vector (L2-normalized). Inputs use ImageNet
+   mean/std normalization.
+2. **First frame:** the ground-truth mask is downsampled to the patch grid, giving each
+   patch a soft label (share of background / each object).
+3. **Propagation:** for each patch in frame *t*, compute cosine similarity to all patches
+   in frame 0 and the previous 5 frames, keep the top-10 matches, and take a
+   softmax-weighted (temperature 0.07) average of their labels.
+4. **Output:** patch labels are upsampled to full resolution and argmax gives the mask.
+   Predicted labels are reused as memory for later frames.
+5. **Evaluation:** J (region IoU) and F (boundary F-measure), averaged per object over
+   frames 1..end and then over sequences. Metrics follow the DAVIS definitions but are
+   not the official toolkit.
+
+### Relevant files
+| File | Description |
+|---|---|
+| `davis-dino-kaggle.ipynb` | DINOv2 label propagation + J&F evaluation |
+| `davis_yolo_kaggle.ipynb` | YOLO segmentation + tracking baseline, same metrics |
+| `figures/` | Example GIFs and comparison grids |
+
+Dataset: [DAVIS 2017](https://davischallenge.org) (trainval, 480p)
+
+## comparison
+
+| Sequence | J&F YOLO | YOLO classes | J&F DINOv2 | Diff (YOLO − DINOv2) |
+|---|---:|---|---:|---:|
+| bike-packing | 0.652 | 1: bicycle, 2: person | **0.808** | −0.156 |
+| blackswan | **0.945** | 1: bird | 0.900 | +0.044 |
+| bmx-trees | **0.555** | 1: bicycle, 2: person | 0.516 | +0.039 |
+| breakdance | 0.816 | 1: person | **0.881** | −0.065 |
+| camel | **0.933** | 1: horse | 0.744 | +0.189 |
+| car-roundabout | **0.969** | 1: car | 0.848 | +0.121 |
+| car-shadow | **0.953** | 1: car | 0.878 | +0.075 |
+| cows | **0.933** | 1: cow | 0.841 | +0.092 |
+| dance-twirl | **0.833** | 1: person | 0.821 | +0.013 |
+| dog | **0.946** | 1: dog | 0.731 | +0.215 |
+| **Mean (10 seq.)** | **0.854** | | 0.797 | +0.057 |
 
 ## Member 3 — To be completed
 
