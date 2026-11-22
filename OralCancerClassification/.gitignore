@@ -1,0 +1,10 @@
+# Keep the competition data, weights and run outputs out of Git
+data/
+dinov3/
+runs/
+ana/
+*.pth
+*.pt
+*.npz
+*.npy
+*.csv

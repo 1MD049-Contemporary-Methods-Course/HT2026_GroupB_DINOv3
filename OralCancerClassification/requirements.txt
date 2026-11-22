@@ -1,0 +1,7 @@
+torch
+numpy
+pandas
+scikit-learn
+pillow
+peft
+kaggle  # only for --submit

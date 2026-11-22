@@ -153,9 +153,13 @@ On this sampled split, DINOv3 has slightly higher top-1 precision, while TinyCLI
 
 This is a comparison on one small sampled split. Although the encoders have similar parameter counts, their training data, training objectives, and patch sizes differ, so the results do not isolate the effect of any single design choice.
 
-## Member 4 — To be completed
+## Rishit Reddy — DINOv3 for oral cancer cell classification
 
-_Add implementation idea, method, and relevant files._
+**Goal.** See how far DINOv3 alone can go on the [Multimodal Cancer Classification Challenge 2026](https://www.kaggle.com/competitions/multimodal-cancer-classification-challenge-2026): oral cytology cells imaged in brightfield and fluorescence, with labels only per patient (12 patients) and AUC over about 59,000 test cells from unseen patients.
+
+**Method.** Frozen DINOv3 ViT-S/16 features with a linear probe, then LoRA adapted with Mean Teacher on the unlabelled test cells, WiSE-FT (moving the weights halfway back to frozen DINO), three self-training rounds and kNN smoothing of the scores.
+
+**Result.** 0.685 → **0.768 public / 0.765 private AUC**. Details, all experiments and the code are in [`OralCancerClassification/`](OralCancerClassification/README.md).
 
 ## Member 5 — To be completed
 
