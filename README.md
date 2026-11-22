@@ -92,9 +92,66 @@ Dataset: [DAVIS 2017](https://davischallenge.org) (trainval, 480p)
 | dog | **0.946** | 1: dog | 0.731 | +0.215 |
 | **Mean (10 seq.)** | **0.854** | | 0.797 | +0.057 |
 
-## Member 3 — To be completed
+## Shengkai Chen — DINOv3 vs. TinyCLIP for image retrieval on Imagenette
 
-_Add implementation idea, method, and relevant files._
+**Goal.** Compare two pretrained image encoders, **DINOv3 ViT-S/16** and **TinyCLIP ViT-22M/32**, on image-to-image retrieval. Given a query image, each model ranks the same gallery by visual feature similarity. Both models are used for inference without training or fine-tuning.
+
+**Relevant file.** `dinov3-vs-tinyclip.ipynb` — dataset sampling, feature extraction, retrieval evaluation, visualizations, and optional retrieval with a custom query image.
+
+### Models and method
+
+| Model | Model identifier | Image encoder size | Retrieval feature |
+|---|---|---|---|
+| DINOv3 ViT-S/16 | `vit_small_patch16_dinov3.lvd1689m` | Approximately 21M parameters | Final global CLS token, 384 dimensions |
+| TinyCLIP ViT-22M/32 | `TinyCLIP-auto-ViT-22M-32-Text-10M`, with `LAION400M` weights | 22,024,993 parameters in the saved run | Projected image embedding, 512 dimensions |
+
+1. **Sample the data.** Select gallery images from Imagenette's `train/` split and query images from `val/`, with equal numbers per class. Both models use the same selected images.
+2. **Preprocess each image.** Resize the shorter side to 224 pixels with bicubic interpolation, then center-crop to 224 × 224. Apply each model's corresponding input normalization.
+3. **Extract features.** Run each encoder in evaluation mode with gradient computation disabled. L2-normalize every image embedding.
+4. **Rank the gallery.** Compute the dot product between each query embedding and all gallery embeddings. For L2-normalized vectors, this is cosine similarity. Sort the scores in descending order.
+5. **Evaluate retrieval.** A gallery image is relevant if its class matches the query's class. Labels are used for sampling, evaluation, and visualization; retrieval itself uses the image embeddings.
+
+TinyCLIP is used through its image encoder only. This experiment does not use text prompts, text-to-image retrieval, or a separately trained classifier.
+
+### Experiment setup
+
+| Setting | Value |
+|---|---|
+| Dataset | Imagenette, 160 px version, 10 classes |
+| Gallery | 300 images: 30 per class from `train/` |
+| Queries | 100 images: 10 per class from `val/` |
+| Sampling seeds | 42 for the gallery; 43 for the queries |
+| Encoder input | 224 × 224 RGB images |
+| Batch size | 32 |
+| Retrieval cutoffs | K = 1, 5, 10 |
+| Device | CUDA when available; otherwise CPU |
+
+The classes are tench, English springer, cassette player, chain saw, church, French horn, garbage truck, gas pump, golf ball, and parachute. The selected image paths and labels are saved in `split_manifest.csv`.
+
+### Metrics and results
+
+- **Precision@K:** the fraction of the first K retrieved images that belong to the query's class.
+- **Recall@K:** the fraction of all relevant gallery images found among the first K results.
+- **Average Precision (AP):** precision averaged over the ranks at which relevant images appear, using the complete gallery ranking.
+- **Mean Average Precision (mAP):** AP averaged over all query images.
+
+All reported precision and recall values are also averaged over the queries. With 30 relevant gallery images per query, the maximum Recall@10 is 10/30, approximately 0.3333.
+
+The following values come from the notebook's saved outputs for the default 300-image gallery and 100-query experiment:
+
+| Metric | DINOv3 | TinyCLIP |
+|---|---:|---:|
+| mAP | 0.7880 | **0.8450** |
+| Precision@1 | **0.9800** | 0.9700 |
+| Precision@5 | 0.9100 | **0.9560** |
+| Precision@10 | 0.8900 | **0.9410** |
+| Recall@1 | **0.0327** | 0.0323 |
+| Recall@5 | 0.1517 | **0.1593** |
+| Recall@10 | 0.2967 | **0.3137** |
+
+On this sampled split, DINOv3 has slightly higher top-1 precision, while TinyCLIP performs better at K = 5 and K = 10 and achieves higher mAP. The largest per-class mAP gap is for **church**: 0.3900 for DINOv3 and 0.9248 for TinyCLIP. The notebook also reports the complete per-class and per-query results.
+
+This is a comparison on one small sampled split. Although the encoders have similar parameter counts, their training data, training objectives, and patch sizes differ, so the results do not isolate the effect of any single design choice.
 
 ## Member 4 — To be completed
 
