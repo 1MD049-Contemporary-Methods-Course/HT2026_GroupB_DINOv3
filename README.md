@@ -161,6 +161,10 @@ This is a comparison on one small sampled split. Although the encoders have simi
 
 **Result.** 0.685 → **0.768 public / 0.765 private AUC**. Details, all experiments and the code are in [`OralCancerClassification/`](OralCancerClassification/README.md).
 
-## Member 5 — To be completed
+## Mohammad Zahra — Video object tracking across DINO generations (v1, v2, v3)
 
-_Add implementation idea, method, and relevant files._
+**Goal.** Compare frozen DINO v1, DINOv2 and DINOv3 (four sizes, S to L) on semi-supervised video object segmentation: given the object masks in the first frame, follow the objects through the video with no training. Tested on all 30 [DAVIS 2017](https://davischallenge.org) validation videos and on 8 of our own phone clips, where SAM 2.1 serves as the reference.
+
+**Method.** Label propagation as in the original DINO paper: each patch of a new frame copies the labels of its 5 most similar patches in frame 0 and the 7 previous frames. Every model gets the same settings and the same token grid, so only the features differ. An interactive tool (`track.py`) lets you pick any video, click the objects with SAM 2, check the masks on the whole video and get an MP4 and a GIF of the DINO tracking.
+
+**Result.** DINOv3 is about 6 J&F ahead of v1 and v2 at the same size, and input resolution matters more than model size. Best: **76.3 J&F** on DAVIS (DINOv3-B at 2x) and **81.0 IoU** against SAM 2 on our clips (DINOv3-L at 2x). Every model fails on identical objects that cross. Details, all runs and the code are in [`DINOVideoTracking/`](DINOVideoTracking/README.md).

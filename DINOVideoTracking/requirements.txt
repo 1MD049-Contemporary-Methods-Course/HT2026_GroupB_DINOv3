@@ -1,0 +1,14 @@
+# Install PyTorch first, with the CUDA build that matches your GPU: https://pytorch.org/get-started/locally/
+# (tested with torch 2.10 + CUDA 13.0 on Python 3.13; a CPU build works but is slow)
+torch>=2.3
+torchvision
+transformers>=4.56      # DINOv3 support
+huggingface_hub
+opencv-python
+numpy
+pillow
+imageio-ffmpeg          # bundles ffmpeg, nothing else to install
+pandas                  # make_table.py, eval scripts
+SAM-2 @ git+https://github.com/facebookresearch/sam2.git   # click-to-mask and the SAM 2 reference
+# optional
+# python-pptx           # slides/build_deck.py

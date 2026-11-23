@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Large or personal files: datasets, phone videos, model weights, renders
+data/
+checkpoints/
+third_party/
+outputs/
+videos/
+gifs/
+logs/
+*.rar
+*.zip
+*.mp4
+*.mov
+
+# Results: keep only the summary tables
+results*/*
+!results/summary.csv
+!results/per_sequence.csv
+!results_custom/custom_scores.csv
